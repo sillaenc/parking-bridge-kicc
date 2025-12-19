@@ -1,0 +1,75 @@
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\bin\x86\Debug\KiccTest.exe
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\bin\x86\Debug\KiccTest.pdb
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\obj\x86\Debug\ResolveAssemblyReference.cache
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\obj\x86\Debug\KiccTest.Properties.Resources.resources
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\obj\x86\Debug\KiccTest.csproj.GenerateResource.Cache
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\obj\x86\Debug\KiccTest.exe
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\obj\x86\Debug\KiccTest.pdb
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest2\obj\x86\Debug\KiccTest.exe
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest2\obj\x86\Debug\KiccTest.pdb
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest2\bin\x86\Debug\KiccTest.exe
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest2\bin\x86\Debug\KiccTest.pdb
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest2\obj\x86\Debug\ResolveAssemblyReference.cache
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest2\obj\x86\Debug\KiccTest.Form1.resources
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest2\obj\x86\Debug\KiccTest.Properties.Resources.resources
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest2\obj\x86\Debug\KiccTest.csproj.GenerateResource.Cache
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest_C#\obj\x86\Debug\KiccTest.exe
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest_C#\obj\x86\Debug\KiccTest.pdb
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest_C#\bin\x86\Debug\KiccTest.exe
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest_C#\bin\x86\Debug\KiccTest.pdb
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest_C#\obj\x86\Debug\ResolveAssemblyReference.cache
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest_C#\obj\x86\Debug\KiccTest.Form1.resources
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest_C#\obj\x86\Debug\KiccTest.Properties.Resources.resources
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest_C#\obj\x86\Debug\KiccTest.csproj.GenerateResource.Cache
+D:\POS 배포\5verPOSMODULE\KiccPosDll_1.0.6.0\호출예제\KiccTest_C#\obj\x86\Debug\KiccTest.exe
+D:\POS 배포\5verPOSMODULE\KiccPosDll_1.0.6.0\호출예제\KiccTest_C#\obj\x86\Debug\KiccTest.pdb
+D:\POS 배포\5verPOSMODULE\KiccPosDll_1.0.6.0\호출예제\KiccTest_C#\bin\x86\Debug\KiccTest.exe
+D:\POS 배포\5verPOSMODULE\KiccPosDll_1.0.6.0\호출예제\KiccTest_C#\bin\x86\Debug\KiccTest.pdb
+D:\POS 배포\5verPOSMODULE\KiccPosDll_1.0.6.0\호출예제\KiccTest_C#\obj\x86\Debug\ResolveAssemblyReference.cache
+D:\POS 배포\5verPOSMODULE\KiccPosDll_1.0.6.0\호출예제\KiccTest_C#\obj\x86\Debug\KiccTest.Properties.Resources.resources
+D:\POS 배포\5verPOSMODULE\KiccPosDll_1.0.6.0\호출예제\KiccTest_C#\obj\x86\Debug\KiccTest.csproj.GenerateResource.Cache
+D:\POS 배포\5verPOSMODULE\KiccPosDll_1.0.6.0\호출예제\KiccTest_C#\obj\x86\Debug\KiccTest.Form1.resources
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC\obj\x86\Debug\KiccTest.exe
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC\obj\x86\Debug\KiccTest.pdb
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC\bin\x86\Debug\KiccTest.exe
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC\bin\x86\Debug\KiccTest.pdb
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC\obj\x86\Debug\ResolveAssemblyReference.cache
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC\obj\x86\Debug\KiccTest.Properties.Resources.resources
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC\obj\x86\Debug\KiccTest.csproj.GenerateResource.Cache
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC\obj\x86\Debug\KiccTest.Form1.resources
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩\obj\x86\Debug\KiccTest.exe
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩\obj\x86\Debug\KiccTest.pdb
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩\obj\x86\Debug\ResolveAssemblyReference.cache
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩\obj\x86\Debug\KiccTest.Form1.resources
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩\obj\x86\Debug\KiccTest.Properties.Resources.resources
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩\obj\x86\Debug\KiccTest.csproj.GenerateResource.Cache
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩\bin\x86\Debug\KiccTest.exe
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩\bin\x86\Debug\KiccTest.pdb
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩_1.0.7.0\obj\x86\Debug\KiccTest.exe
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩_1.0.7.0\obj\x86\Debug\KiccTest.pdb
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩_1.0.7.0\bin\x86\Debug\KiccTest.exe
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩_1.0.7.0\bin\x86\Debug\KiccTest.pdb
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩_1.0.7.0\obj\x86\Debug\ResolveAssemblyReference.cache
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩_1.0.7.0\obj\x86\Debug\KiccTest.Form1.resources
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩_1.0.7.0\obj\x86\Debug\KiccTest.Properties.Resources.resources
+F:\POS\POS 배포 SAMPLE\KiccTest_C#_보안IC_인코딩_1.0.7.0\obj\x86\Debug\KiccTest.csproj.GenerateResource.Cache
+Z:\POS & PAD & MOBILE\POS\모듈배포\Sample\KiccTest_C#_보안IC_1.0.7.7\obj\x86\Debug\KiccTest.exe
+Z:\POS & PAD & MOBILE\POS\모듈배포\Sample\KiccTest_C#_보안IC_1.0.7.7\obj\x86\Debug\KiccTest.pdb
+C:\Users\kiccUser\Desktop\KiccTest_C#_보안IC_1.0.7.7\obj\x86\Debug\KiccTest.exe
+C:\Users\kiccUser\Desktop\KiccTest_C#_보안IC_1.0.7.7\obj\x86\Debug\KiccTest.pdb
+C:\Users\kiccUser\Desktop\KiccTest_C#_보안IC_763C\obj\x86\Debug\KiccTest.exe
+C:\Users\kiccUser\Desktop\KiccTest_C#_보안IC_763C\obj\x86\Debug\KiccTest.pdb
+C:\Users\kiccUser\Desktop\KiccTest_C#_보안IC_763C\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\kiccUser\Desktop\KiccTest_C#_보안IC_763C\obj\x86\Debug\KiccTest.Form1.resources
+C:\Users\kiccUser\Desktop\KiccTest_C#_보안IC_763C\obj\x86\Debug\KiccTest.Properties.Resources.resources
+C:\Users\kiccUser\Desktop\KiccTest_C#_보안IC_763C\obj\x86\Debug\KiccTest.csproj.GenerateResource.Cache
+C:\Users\kiccUser\Desktop\KiccTest_C#_보안IC_763C\bin\x86\Debug\KiccTest.exe
+C:\Users\kiccUser\Desktop\KiccTest_C#_보안IC_763C\bin\x86\Debug\KiccTest.pdb
+C:\Users\user\Desktop\지원\모듈 지원\ED-785\KiccTest_C#_보안IC_785\obj\x86\Debug\KiccTest.exe
+C:\Users\user\Desktop\지원\모듈 지원\ED-785\KiccTest_C#_보안IC_785\obj\x86\Debug\KiccTest.pdb
+C:\Users\user\Desktop\지원\모듈 지원\ED-785\KiccTest_C#_보안IC_785\bin\x86\Debug\KiccTest.exe
+C:\Users\user\Desktop\지원\모듈 지원\ED-785\KiccTest_C#_보안IC_785\bin\x86\Debug\KiccTest.pdb
+C:\Users\user\Desktop\지원\모듈 지원\ED-785\KiccTest_C#_보안IC_785\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\user\Desktop\지원\모듈 지원\ED-785\KiccTest_C#_보안IC_785\obj\x86\Debug\KiccTest.Form1.resources
+C:\Users\user\Desktop\지원\모듈 지원\ED-785\KiccTest_C#_보안IC_785\obj\x86\Debug\KiccTest.Properties.Resources.resources
+C:\Users\user\Desktop\지원\모듈 지원\ED-785\KiccTest_C#_보안IC_785\obj\x86\Debug\KiccTest.csproj.GenerateResource.Cache

@@ -1,0 +1,46 @@
+ED-721 프로젝트 진행 요약 (이 세션 기준)
+----------------------------------------
+
+주요 성과
+- SPEC 분석: ED-721 연동 인터페이스(PDF)에서 패킷 구조(STX/LEN/CNT/CMD/GCD/JCD/DATA/ETX/CRC), CRC 알고리즘(0x8005, init 0xFFFF, LSB-first, NOT 후 byte-swap), 명령 집합(FB/14/{01,02,03,04,13,14}, FB/01/06) 정리.
+- Python 직통 구현: KiccPos.dll 없이 시리얼로 직접 통신.
+  - kicc_info_request.py: 단말정보(FB/14/02) 요청/응답 CRC 검증, 필드 디코딩 성공 확인(len_mode=2, big, big).
+  - ed721_cli.py: 다기능 CLI (init, info, display, approval, sound, image, rfid), 프레이밍 탐색/고정, 응답 CRC 검증·ACK 전송, 승인/취소/재전송 응답 ASCII 표시 추가.
+  - ed721_menu.py: 숫자 선택형 메뉴 인터페이스.
+  - ED721_CLI_Commands.txt: 주요 명령 예제 정리(포트 /dev/ttyUSB0 기준).
+- 거래 테스트:
+  - 승인/취소 실제 성공(문자 수신). 승인 응답 전문은 단말 설정 탓으로 시리얼로 안 내려올 수 있음. 취소 응답, 재전송(LA) 응답은 수신 확인.
+  - 승인번호 필요 시 S01=LA(최종거래내역 재전송)로 직전 거래 응답을 받아 확인.
+- 기타: GPIO 모니터(py) 별도 존재(현재 작업과 직접 연관 없음).
+
+주요 명령 예시 (한 줄)
+- 단말정보:  
+  python ed721_cli.py --port /dev/ttyUSB0 --len-mode 2 --len-endian big --crc-endian big info
+- 화면표시:  
+  python ed721_cli.py --port /dev/ttyUSB0 --len-mode 2 --len-endian big --crc-endian big --data "READY|TAP CARD||" display
+- 소리출력:  
+  python ed721_cli.py --port /dev/ttyUSB0 --len-mode 2 --len-endian big --crc-endian big --data "beep.wav" sound
+- 승인(10원 예시):  
+  python ed721_cli.py --port /dev/ttyUSB0 --len-mode 2 --len-endian big --crc-endian big --wait 10 --data "S00=002;S01=D1;S02=40;S09=00;S10=0000000010;S23=POS001;" approval
+- 취소(원승인번호/일자 필요):  
+  python ed721_cli.py --port /dev/ttyUSB0 --len-mode 2 --len-endian big --crc-endian big --wait 10 --data "S00=002;S01=D4;S02=40;S09=00;S10=0000000010;S12=<승인번호>;S13=<YYMMDD>;S23=POS002;" approval
+- 재전송(직전 거래내역 받아 승인번호 확인):  
+  python ed721_cli.py --port /dev/ttyUSB0 --len-mode 2 --len-endian big --crc-endian big --wait 10 --data "S00=002;S01=LA;S02=40;S23=POS003;" approval
+- RFID S/N:  
+  python ed721_cli.py --port /dev/ttyUSB0 --len-mode 2 --len-endian big --crc-endian big rfid
+
+응답 관련 메모
+- len_mode=2 / big / big 조합이 단말정보·거래 모두에서 동작 확인됨.
+- display처럼 응답 전문이 없는 명령은 ACK만 받고 “응답 파싱 실패” 메시지가 나올 수 있음(정상).
+- 승인 응답이 시리얼로 안 보이면 단말 설정이 “응답을 TCP로만 송신”하는 상태일 수 있음. RS232 응답 설정/포트 확인 필요. 재전송(LA)로 직전 승인정보는 끌어올 수 있음.
+
+간편결제/카드 타입 메모
+- S05(RF Flag)는 바코드 간편결제 구분용(전문버전 001). 전문버전 002에서는 단말이 바코드 prefix로 구분해 입력 불필요.
+- Samsung Pay/Apple Pay는 NFC EMV 컨택리스 방식이므로 S05와 무관. 단말/가맹이 컨택리스/브랜드 인증되어 있으면 일반 승인으로 처리.
+
+UI/문구 변경 가능 범위
+- 연동 측에서 할 수 있는 것은 화면표시 요청(FB/14/03, 일시 메시지)과 이미지 다운로드(FB/14/14, 초기화면 이미지)뿐. 단말 내부 메뉴 텍스트 영구 변경 기능은 스펙에 없음(단말 설정/펌웨어 영역).
+
+남은 이슈/확인 포인트
+- 승인 응답이 시리얼로 오지 않는 환경에서는 단말 설정(연동 방식, POS IP/Port) 점검 필요.
+- 더 안전한 재시도/재전송 정책(NAK 처리, CNT 관리)과 장기 로그 수집이 필요하면 추가 구현 검토.

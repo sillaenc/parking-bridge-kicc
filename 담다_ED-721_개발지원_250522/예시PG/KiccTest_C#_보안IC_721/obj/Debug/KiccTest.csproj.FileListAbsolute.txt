@@ -1,0 +1,7 @@
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\obj\Debug\ResolveAssemblyReference.cache
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\obj\Debug\KiccTest.Properties.Resources.resources
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\obj\Debug\KiccTest.csproj.GenerateResource.Cache
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\bin\Debug\KiccTest.exe
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\bin\Debug\KiccTest.pdb
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\obj\Debug\KiccTest.exe
+D:\POS 배포\5verPOSMODULE\5.0.0.2\KiccPosDll(C#)2\KiccTest\obj\Debug\KiccTest.pdb
