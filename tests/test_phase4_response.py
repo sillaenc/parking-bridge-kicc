@@ -138,7 +138,8 @@ class TestExtractCancelInfo:
         assert info["S10"] == "0000000010"    # zero-padded
 
     def test_returns_none_for_test_mode(self):
-        """When R09 is all zeros (test mode), we still should *try* but caller can decide."""
+        """When R09 is all zeros (PG capture didn't happen), we still produce the params
+        — caller can decide whether to actually use them based on is_approval_success."""
         p = _parse(APPROVAL_TEST_MODE_OK_RX)
         kv = parse_kv_response(p.data)
         info = extract_cancel_info(kv)

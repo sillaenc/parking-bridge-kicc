@@ -75,5 +75,5 @@
 4. **Burst 가능 명령**: info, init, display(주의) — 단 거래 진행 중에는 절대 X
 
 ## 결과 fixture
-`tests/fixtures/phase3_extra_results.json` — 22개 케이스 raw TX/RX hex 포함.
+`tests/fixtures/phase3_extra_results.json` — 15개 엔트리 raw TX/RX hex 포함 (A 8건 + B 6건 + C burst 1건).
 향후 회귀 테스트 또는 운영 매뉴얼 부록으로 활용.

@@ -277,7 +277,7 @@ tests/
   manual_phase3_extra.py   입력검증/CRC/연속송신 자동화
   fixtures/
     captures.py            실측 응답 10종 hex
-    phase3_extra_results.json 22개 케이스 raw 결과
+    phase3_extra_results.json 15개 엔트리 raw 결과 (A 8건 + B 6건 + C burst 1건)
 ```
 
 ## 9. 결론
