@@ -151,6 +151,8 @@ assert is_cancel_success(failed_cancel_kv) is False  # RCD=00이어도 실패
 
 세 파일에서 중복돼 있던 `calc_crc`, `Framing`, `ParsedPacket`, `build_packet`, `try_parse_first_packet`, `decode_terminal_info_fields`, `_request_once` 모두 제거하고 `ed721_proto`에서 import.
 
+리팩토링 제외: `kicc_crc_fuzzer.py`는 의도적으로 잘못된 CRC를 만드는 framing 탐색용 도구라 `ed721_proto.calc_crc`(올바른 CRC만 반환)를 그대로 쓸 수 없음. 향후 STX/ETX 상수 정도만 공유하도록 가벼운 통합 가능하지만 현재는 독립 유지.
+
 #### 4-D. NAK 자동 재전송 정책
 
 설계 원칙: **중복 청구 사고 방지 최우선**.
@@ -254,6 +256,9 @@ ed721_proto.py             공통 프로토콜 모듈 (모든 헬퍼 통합)
 ed721_cli.py               명령형 CLI (refactored)
 ed721_menu.py              대화형 메뉴 (refactored)
 kicc_info_request.py       단말정보 단일 요청 (refactored)
+kicc_crc_fuzzer.py         framing 탐색용 퍼저 (의도적 비표준 CRC, 미리팩토링 — 독립 유지)
+ED721_CLI_Commands.txt     CLI 사용 예제 (R09 안내, 신규 플래그 포함)
+SESSION_SUMMARY.txt        세션 요약 (docs/REPORT.md 가이드 포함)
 .gitignore
 
 docs/
