@@ -202,7 +202,7 @@ def is_approval_success(fields: dict[str, str]) -> bool:
     Rules:
       - S01 == "I1"
       - R02 == "A"
-      - R09 present and non-zero (real PG tx id; if all zeros => test/demo mode)
+      - R09 present and non-zero (real PG tx id; all zeros means PG capture did not happen)
     Caller must already have validated RCD == 0x00.
     """
     if fields.get("S01") != "I1":

@@ -14,7 +14,7 @@ Phase 3에서 발견한 가장 위험한 버그(취소 RCD=00이지만 PG 실패
 |------|------|
 | `is_failure_short_message(data)` | DATA가 `CANCELED`/`TIMEOUT`/`FAIL` 중 하나면 그 문자열, 아니면 None |
 | `parse_kv_response(data)` | EUC-KR 인식 후 `S00=...;S01=...;` → `dict` |
-| `is_approval_success(fields)` | S01=I1 + R02=A + R09 비제로 (테스트모드 R09=000... 제외) |
+| `is_approval_success(fields)` | S01=I1 + R02=A + R09 비제로 (R09=000...은 실 매입 X 상태로 간주) |
 | `is_cancel_success(fields)` | S01=I4 + **R17 부재** + R09 존재 + R19에 "효력없음" 없음 |
 | `extract_cancel_info(fields)` | 승인 fields → `{S12: R09, S13: R07[:6], S10: zfilled}` |
 | `build_cancel_data(fields, pos_id)` | 위 정보로 D4 ASCII payload 생성 |

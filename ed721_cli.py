@@ -90,7 +90,7 @@ def _print_business_judgement(parsed: ParsedPacket) -> None:
         s01 = kv.get("S01", "")
         if s01 == "I1":
             ok = is_approval_success(kv)
-            print(f"[판정] 승인 {'성공' if ok else '의심(R09=0 → 테스트모드 가능성)'}: "
+            print(f"[판정] 승인 {'성공' if ok else '의심(R09=0 → 실 매입 미발생)'}: "
                   f"S07={kv.get('S07')} R09={kv.get('R09')} R19={kv.get('R19', '')[:20]}")
             if ok:
                 print(f"[취소용] S12={kv.get('R09')} S13={kv.get('R07', '')[:6]} S10={kv.get('S10')}")
