@@ -1,0 +1,149 @@
+[
+  {
+    "label": "A1_no_S00",
+    "tx_hex": "02 00 32 01 FB 14 04 53 30 31 3D 44 31 3B 53 30 32 3D 34 30 3B 53 30 39 3D 30 30 3B 53 31 30 3D 30 30 30 30 30 30 30 30 30 31 3B 53 32 33 3D 50 41 31 3B 03 67 D5",
+    "rx_len": 3,
+    "rx_hex": "06 06 06",
+    "had_ack": true,
+    "had_nak": false,
+    "rcd": null,
+    "data": null
+  },
+  {
+    "label": "A2_no_S01",
+    "tx_hex": "02 00 33 01 FB 14 04 53 30 30 3D 30 30 32 3B 53 30 32 3D 34 30 3B 53 30 39 3D 30 30 3B 53 31 30 3D 30 30 30 30 30 30 30 30 30 31 3B 53 32 33 3D 50 41 32 3B 03 FA E8",
+    "rx_len": 22,
+    "rx_hex": "06 06 06 02 00 0F 01 FB 14 04 FF 43 41 4E 43 45 4C 45 44 03 71 65",
+    "had_ack": true,
+    "had_nak": false,
+    "rcd": 255,
+    "data": "CANCELED"
+  },
+  {
+    "label": "A3_no_S10",
+    "tx_hex": "02 00 2B 01 FB 14 04 53 30 30 3D 30 30 32 3B 53 30 31 3D 44 31 3B 53 30 32 3D 34 30 3B 53 30 39 3D 30 30 3B 53 32 33 3D 50 41 33 3B 03 54 6A",
+    "rx_len": 18,
+    "rx_hex": "06 06 06 02 00 0B 02 FB 14 04 FF 46 41 49 4C 03 91 36",
+    "had_ack": true,
+    "had_nak": false,
+    "rcd": 255,
+    "data": "FAIL"
+  },
+  {
+    "label": "A4_invalid_S01",
+    "tx_hex": "02 00 3A 01 FB 14 04 53 30 30 3D 30 30 32 3B 53 30 31 3D 5A 5A 3B 53 30 32 3D 34 30 3B 53 30 39 3D 30 30 3B 53 31 30 3D 30 30 30 30 30 30 30 30 30 31 3B 53 32 33 3D 50 41 34 3B 03 D3 7E",
+    "rx_len": 3,
+    "rx_hex": "06 06 06",
+    "had_ack": true,
+    "had_nak": false,
+    "rcd": null,
+    "data": null
+  },
+  {
+    "label": "A5_zero_amount",
+    "tx_hex": "02 00 3A 01 FB 14 04 53 30 30 3D 30 30 32 3B 53 30 31 3D 44 31 3B 53 30 32 3D 34 30 3B 53 30 39 3D 30 30 3B 53 31 30 3D 30 30 30 30 30 30 30 30 30 30 3B 53 32 33 3D 50 41 35 3B 03 BD 60",
+    "rx_len": 22,
+    "rx_hex": "06 06 06 02 00 0F 03 FB 14 04 FF 43 41 4E 43 45 4C 45 44 03 2F 3C",
+    "had_ack": true,
+    "had_nak": false,
+    "rcd": 255,
+    "data": "CANCELED"
+  },
+  {
+    "label": "A6_big_amount",
+    "tx_hex": "02 00 3A 01 FB 14 04 53 30 30 3D 30 30 32 3B 53 30 31 3D 44 31 3B 53 30 32 3D 34 30 3B 53 30 39 3D 30 30 3B 53 31 30 3D 39 39 39 39 39 39 39 39 39 39 3B 53 32 33 3D 50 41 36 3B 03 A5 B8",
+    "rx_len": 3,
+    "rx_hex": "06 06 06",
+    "had_ack": true,
+    "had_nak": false,
+    "rcd": null,
+    "data": null
+  },
+  {
+    "label": "A7_empty_data",
+    "tx_hex": "02 00 06 01 FB 14 04 03 A8 5C",
+    "rx_len": 22,
+    "rx_hex": "06 06 06 02 00 0F 04 FB 14 04 FF 43 41 4E 43 45 4C 45 44 03 62 FB",
+    "had_ack": true,
+    "had_nak": false,
+    "rcd": 255,
+    "data": "CANCELED"
+  },
+  {
+    "label": "A8_no_semicolons",
+    "tx_hex": "02 00 23 01 FB 14 04 53 30 30 3D 30 30 32 20 53 30 31 3D 44 31 20 53 31 30 3D 30 30 30 30 30 30 30 30 30 31 03 6A 7D",
+    "rx_len": 18,
+    "rx_hex": "06 06 06 02 00 0B 05 FB 14 04 FF 46 41 49 4C 03 6E 3E",
+    "had_ack": true,
+    "had_nak": false,
+    "rcd": 255,
+    "data": "FAIL"
+  },
+  {
+    "label": "B1_crc_flipped",
+    "tx_hex": "02 00 06 01 FB 14 02 03 DE 1A",
+    "rx_len": 3,
+    "rx_hex": "15 15 15",
+    "had_ack": false,
+    "had_nak": true,
+    "rcd": null,
+    "data": null
+  },
+  {
+    "label": "B2_etx_zeroed",
+    "tx_hex": "02 00 06 01 FB 14 02 00 DE E5",
+    "rx_len": 3,
+    "rx_hex": "15 15 15",
+    "had_ack": false,
+    "had_nak": true,
+    "rcd": null,
+    "data": null
+  },
+  {
+    "label": "B3_no_crc",
+    "tx_hex": "02 00 06 01 FB 14 02 03",
+    "rx_len": 1,
+    "rx_hex": "15",
+    "had_ack": false,
+    "had_nak": false,
+    "rcd": null,
+    "data": null
+  },
+  {
+    "label": "B4_extra_stx",
+    "tx_hex": "02 02 00 06 01 FB 14 02 03 DE E5",
+    "rx_len": 3,
+    "rx_hex": "15 15 15",
+    "had_ack": false,
+    "had_nak": true,
+    "rcd": null,
+    "data": null
+  },
+  {
+    "label": "B5_random_crc",
+    "tx_hex": "02 00 06 01 FB 14 02 03 AB CD",
+    "rx_len": 3,
+    "rx_hex": "15 15 15",
+    "had_ack": false,
+    "had_nak": true,
+    "rcd": null,
+    "data": null
+  },
+  {
+    "label": "B6_stx_only",
+    "tx_hex": "02",
+    "rx_len": 3,
+    "rx_hex": "15 15 15",
+    "had_ack": false,
+    "had_nak": true,
+    "rcd": null,
+    "data": null
+  },
+  {
+    "label": "C_rapid_fire_info_x10",
+    "tx_count": 10,
+    "rx_total_bytes_unused": 0,
+    "parsed_count": 10,
+    "remaining_buf_hex": ""
+  }
+]
