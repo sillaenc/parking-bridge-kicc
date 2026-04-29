@@ -1,210 +1,42 @@
-"""
-ED-721 POS interface multi-command CLI (serial, no KiccPos.dll).
+"""ED-721 POS interface multi-command CLI (serial, no KiccPos.dll).
 
-Supported commands (from SPEC):
-- FB/14/01 : init
-- FB/14/02 : terminal info (decodes fields)
-- FB/14/03 : display message (DATA=ASCII, '|' for line breaks)
-- FB/14/04 : approval request (DATA=key=value; ... ; raw ASCII)
-- FB/14/13 : sound play (DATA=wav filename, e.g., beep.wav)
-- FB/14/14 : image download (DATA=URL)
-- FB/01/06 : RFID card serial number (DATA empty or "R")
-
-Features:
-- Builds STX|LEN|CNT|CMD|GCD|JCD|DATA|ETX|CRC with CRC16(0x8005, init 0xFFFF, LSB-first,
-  final NOT + byte-swap), CRC range = LEN..ETX.
-- Framing search: len_mode 0..3, len/crc endian big/little (spec default works on tested device).
-- Sends, collects response, validates CRC, auto-ACK (06 06 06) when a valid packet is parsed.
-- Prints hex dump and, when applicable, decoded info (terminal info / RFID SNO).
-
-Prereq: pip install pyserial
-
-Examples (Windows):
-  python ed721_cli.py --port COM3 init
-  python ed721_cli.py --port COM3 info
-  python ed721_cli.py --port COM3 display --data "HELLO|LINE2||LINE4"
-  python ed721_cli.py --port COM3 sound --data beep.wav
-  python ed721_cli.py --port COM3 image --data http://example.com/img.png
-  python ed721_cli.py --port COM3 rfid
-  python ed721_cli.py --port COM3 approval --data "S00=002;S01=D1;S02=40;S09=00;S10=1004;S23=POS001;"
-
-If your device already worked with kicc_info_request.py, pin framing:
-  --len-mode 2 --len-endian big --crc-endian big
+Refactored to import all protocol primitives from ed721_proto. NAK retry policy
+is enforced by ed721_proto.send_and_wait — financial commands (FB/14/04) never
+auto-retry on NAK.
 """
 
 from __future__ import annotations
 
 import argparse
 import sys
-import time
-from dataclasses import dataclass
-from typing import Iterable, Literal, Optional, Sequence, Tuple
+from typing import Sequence
 
 try:
     import serial
-except ModuleNotFoundError as e:  # pragma: no cover
-        raise SystemExit("pyserial is required: pip install pyserial") from e
+except ModuleNotFoundError as e:
+    raise SystemExit("pyserial is required: pip install pyserial") from e
 
 try:
     from serial.tools import list_ports
-except Exception:  # pragma: no cover
-    list_ports = None  # optional
+except Exception:
+    list_ports = None
 
-STX = 0x02
-ETX = 0x03
-ACK_TRIPLE = bytes([0x06, 0x06, 0x06])
-NAK_TRIPLE = bytes([0x15, 0x15, 0x15])
-
-CMD = 0xFB
-
-Endian = Literal["big", "little"]
-
-
-@dataclass(frozen=True)
-class Framing:
-    """LEN/CRC framing definition."""
-
-    len_mode: int
-    len_endian: Endian
-    crc_endian: Endian
-
-
-@dataclass(frozen=True)
-class ParsedPacket:
-    raw: bytes
-    cnt: int
-    cmd: int
-    gcd: int
-    jcd: int
-    rcd: Optional[int]
-    data: bytes
-
-
-def calc_crc(data: Iterable[int]) -> int:
-    """CRC16 per SPEC appendix get_crc (poly 0x8005, init 0xFFFF, LSB-first)."""
-
-    seed = 0x8005
-    crc = 0xFFFF
-    for b in data:
-        temp = b & 0xFF
-        for _ in range(8):
-            if (crc & 1) ^ (temp & 1):
-                crc = (crc >> 1) ^ seed
-            else:
-                crc >>= 1
-            temp >>= 1
-    crc = (~crc) & 0xFFFF
-    temp = crc
-    crc = ((crc << 8) | ((temp >> 8) & 0xFF)) & 0xFFFF
-    return crc
-
-
-def _compute_len_value(*, framing: Framing, data_len: int) -> int:
-    base_len = 4 + data_len  # CNT+CMD+GCD+JCD+DATA
-    if framing.len_mode == 0:
-        return base_len
-    if framing.len_mode == 1:
-        return base_len + 1  # +ETX
-    if framing.len_mode == 2:
-        return base_len + 2  # +LEN(2)
-    if framing.len_mode == 3:
-        return base_len + 3  # +LEN(2)+ETX
-    raise ValueError("len_mode must be 0..3")
-
-
-def build_packet(*, cnt: int, cmd: int, gcd: int, jcd: int, data: bytes, framing: Framing) -> bytes:
-    len_value = _compute_len_value(framing=framing, data_len=len(data))
-    len_bytes = len_value.to_bytes(2, byteorder=framing.len_endian)
-    payload = len_bytes + bytes([cnt, cmd, gcd, jcd]) + data + bytes([ETX])
-    crc_val = calc_crc(payload)  # LEN..ETX
-    crc_bytes = crc_val.to_bytes(2, byteorder=framing.crc_endian)
-    return bytes([STX]) + payload + crc_bytes
-
-
-def _data_len_from_len_value(*, framing: Framing, len_value: int) -> Optional[int]:
-    if framing.len_mode == 0:
-        data_len = len_value - 4
-    elif framing.len_mode == 1:
-        data_len = len_value - 5
-    elif framing.len_mode == 2:
-        data_len = len_value - 6
-    elif framing.len_mode == 3:
-        data_len = len_value - 7
-    else:
-        return None
-    if data_len < 0:
-        return None
-    return data_len
-
-
-def try_parse_first_packet(buf: bytes, framing: Framing) -> Optional[ParsedPacket]:
-    """Return first CRC-valid packet in buf per framing definition."""
-
-    for start in range(len(buf)):
-        if buf[start] != STX:
-            continue
-        if start + 3 > len(buf):
-            break
-        len_bytes = buf[start + 1 : start + 3]
-        len_value = int.from_bytes(len_bytes, byteorder=framing.len_endian)
-        data_len = _data_len_from_len_value(framing=framing, len_value=len_value)
-        if data_len is None:
-            continue
-
-        total_len = 10 + data_len  # STX + LEN(2) + CNT+CMD+GCD+JCD + DATA + ETX + CRC(2)
-        end = start + total_len
-        if end > len(buf):
-            continue
-
-        pkt = buf[start:end]
-        etx_index = 7 + data_len
-        if pkt[etx_index] != ETX:
-            continue
-
-        crc_expected = calc_crc(pkt[1 : etx_index + 1])  # LEN..ETX
-        crc_got = int.from_bytes(pkt[etx_index + 1 : etx_index + 3], byteorder=framing.crc_endian)
-        if crc_got != crc_expected:
-            continue
-
-        cnt = pkt[3]
-        cmd = pkt[4]
-        gcd = pkt[5]
-        jcd = pkt[6]
-        data_bytes = pkt[7:etx_index]
-        rcd = data_bytes[0] if data_bytes else None
-        rest = data_bytes[1:] if data_bytes else b""
-        return ParsedPacket(raw=pkt, cnt=cnt, cmd=cmd, gcd=gcd, jcd=jcd, rcd=rcd, data=rest)
-
-    return None
-
-
-def _decode_ascii_field(b: bytes) -> str:
-    return b.decode("ascii", errors="replace").rstrip("\x00").strip()
-
-
-def decode_terminal_info_fields(data: bytes) -> Optional[dict]:
-    """Decode FB 14 02 response data (excluding RCD)."""
-
-    expected = 4 + 4 + 12 + 16 + 10 + 3 + 30
-    if len(data) < expected:
-        return None
-
-    model = _decode_ascii_field(data[0:4])
-    version = _decode_ascii_field(data[4:8])
-    serial_no = _decode_ascii_field(data[8:20])
-    secure_id = _decode_ascii_field(data[20:36])
-    tid = _decode_ascii_field(data[36:46])
-    term_no = _decode_ascii_field(data[46:49])
-    ip_port = _decode_ascii_field(data[49:79])
-    return {
-        "model": model,
-        "version": version,
-        "serial_no": serial_no,
-        "secure_id": secure_id,
-        "tid": tid,
-        "terminal_no": term_no,
-        "ip_port": ip_port,
-    }
+from ed721_proto import (
+    ACK_TRIPLE,
+    CMD,
+    DEFAULT_FRAMING,
+    Framing,
+    NAK_TRIPLE,
+    ParsedPacket,
+    RetryPolicy,
+    decode_terminal_info,
+    is_approval_success,
+    is_cancel_success,
+    is_failure_short_message,
+    parse_kv_response,
+    policy_for,
+    send_and_wait,
+)
 
 
 def _format_hex(buf: bytes) -> str:
@@ -212,48 +44,7 @@ def _format_hex(buf: bytes) -> str:
 
 
 def _default_port() -> str:
-    if sys.platform.startswith("win"):
-        return "COM3"
-    return "/dev/ttyUSB0"
-
-
-def _request_once(
-    *,
-    ser: serial.Serial,
-    framing: Framing,
-    cnt: int,
-    cmd: int,
-    gcd: int,
-    jcd: int,
-    data: bytes,
-    max_wait_sec: float,
-) -> Tuple[bytes, Optional[ParsedPacket]]:
-    ser.reset_input_buffer()
-    pkt = build_packet(cnt=cnt, cmd=cmd, gcd=gcd, jcd=jcd, data=data, framing=framing)
-    print(
-        f"[전송][len_mode={framing.len_mode} len={framing.len_endian} crc={framing.crc_endian}] "
-        f"{_format_hex(pkt)}"
-    )
-    ser.write(pkt)
-    ser.flush()
-
-    deadline = time.time() + max_wait_sec
-    buf = b""
-    parsed: Optional[ParsedPacket] = None
-    while time.time() < deadline:
-        chunk = ser.read(ser.in_waiting or 1)
-        if chunk:
-            buf += chunk
-            parsed = try_parse_first_packet(buf, framing)
-            if parsed is not None:
-                # POS must ACK after receiving response.
-                ser.write(ACK_TRIPLE)
-                ser.flush()
-                break
-            continue
-        time.sleep(0.01)
-
-    return buf, parsed
+    return "COM3" if sys.platform.startswith("win") else "/dev/ttyUSB0"
 
 
 def _resolve_framings(args: argparse.Namespace) -> Sequence[Framing]:
@@ -261,11 +52,9 @@ def _resolve_framings(args: argparse.Namespace) -> Sequence[Framing]:
         if args.len_mode is None or args.len_endian is None or args.crc_endian is None:
             raise SystemExit("When overriding framing, set --len-mode, --len-endian and --crc-endian together.")
         return [Framing(args.len_mode, args.len_endian, args.crc_endian)]
-
-    primary = Framing(2, "big", "big")
     if args.no_auto:
-        return [primary]
-
+        return [DEFAULT_FRAMING]
+    primary = DEFAULT_FRAMING
     rest = [
         Framing(lm, le, ce)
         for lm in range(4)
@@ -289,61 +78,95 @@ def _build_data_bytes(args: argparse.Namespace) -> bytes:
     return b""
 
 
+def _print_business_judgement(parsed: ParsedPacket) -> None:
+    if parsed.cmd != CMD or parsed.gcd != 0x14 or parsed.jcd != 0x04:
+        return
+    if parsed.rcd == 0xFF:
+        msg = is_failure_short_message(parsed.data)
+        print(f"[판정] 거래 실패 ({msg or '본문 별도'})")
+        return
+    if parsed.rcd == 0x00:
+        kv = parse_kv_response(parsed.data)
+        s01 = kv.get("S01", "")
+        if s01 == "I1":
+            ok = is_approval_success(kv)
+            print(f"[판정] 승인 {'성공' if ok else '의심(R09=0 → 테스트모드 가능성)'}: "
+                  f"S07={kv.get('S07')} R09={kv.get('R09')} R19={kv.get('R19', '')[:20]}")
+            if ok:
+                print(f"[취소용] S12={kv.get('R09')} S13={kv.get('R07', '')[:6]} S10={kv.get('S10')}")
+        elif s01 == "I4":
+            ok = is_cancel_success(kv)
+            r17 = kv.get("R17", "")
+            print(f"[판정] 취소 {'성공' if ok else '실패 (R17 존재)'}: "
+                  f"R09={kv.get('R09', '(없음)')} R19={kv.get('R19', '')[:20]}")
+            if r17:
+                print(f"[안내] R17 메시지: {r17}")
+
+
 def _print_parsed(parsed: ParsedPacket) -> None:
     print(
         f"[패킷] CNT={parsed.cnt} CMD={parsed.cmd:02X} GCD={parsed.gcd:02X} "
         f"JCD={parsed.jcd:02X} RCD={(parsed.rcd if parsed.rcd is not None else -1):02X}"
     )
     if parsed.cmd == CMD and parsed.gcd == 0x14 and parsed.jcd == 0x02 and parsed.rcd in (0x00, 0xFF):
-        info = decode_terminal_info_fields(parsed.data)
-        if info:
-            print("[안내] 단말정보:", info)
-        else:
-            print(f"[안내] 단말정보 데이터 길이={len(parsed.data)} (디코딩 실패)")
+        info = decode_terminal_info(parsed.data)
+        print("[안내] 단말정보:" if info else f"[안내] 단말정보 데이터 길이={len(parsed.data)} (디코딩 실패)", info or "")
     if parsed.cmd == CMD and parsed.gcd == 0x01 and parsed.jcd == 0x06 and parsed.rcd in (0x00, 0xFF):
-        # RFID SNO read: data = 4 bytes (binary). Show hex.
         print(f"[안내] RFID SNO (hex): {parsed.data.hex().upper()}")
-    if parsed.cmd == CMD and parsed.gcd == 0x14 and parsed.jcd == 0x04 and parsed.rcd in (0x00, 0xFF):
-        # 승인/취소/재전송 응답: Data가 ASCII라면 표시
-        if parsed.data:
-            try:
-                txt = parsed.data.decode("ascii", errors="replace")
-                print(f"[안내] 승인응답 Data(ASCII): {txt}")
-            except Exception:
-                print(f"[안내] 승인응답 Data(hex): {parsed.data.hex().upper()}")
+    if parsed.cmd == CMD and parsed.gcd == 0x14 and parsed.jcd == 0x04 and parsed.data:
+        try:
+            print(f"[안내] 승인응답 Data(ASCII): {parsed.data.decode('ascii', errors='replace')}")
+        except Exception:
+            print(f"[안내] 승인응답 Data(hex): {parsed.data.hex().upper()}")
+
+
+def _acquire_port_lock(port: str) -> None:
+    """Linux-only fcntl lock to prevent two instances from sharing the serial port."""
+    if sys.platform.startswith("win"):
+        return
+    try:
+        import fcntl, os as _os
+        path = f"/tmp/ed721{port.replace('/', '_')}.lock"
+        fd = _os.open(path, _os.O_CREAT | _os.O_RDWR, 0o600)
+        try:
+            fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            print(f"[오류] 다른 프로세스가 {port}를 사용 중입니다. (lock={path})")
+            sys.exit(3)
+    except ImportError:
+        pass
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="ED-721 POS serial CLI (no DLL)")
-    parser.add_argument("--port", default=_default_port(), help="Serial port (e.g., COM3 or /dev/ttyUSB0)")
+    parser.add_argument("--port", default=_default_port())
     parser.add_argument("--baud", type=int, default=115200)
-    parser.add_argument("--timeout", type=float, default=0.05, help="serial read timeout (sec)")
-    parser.add_argument("--wait", type=float, default=2.0, help="max wait for response (sec)")
-    parser.add_argument("--cnt", type=int, default=1, help="packet counter start (1..255)")
-    parser.add_argument("--list-ports", action="store_true", help="list serial ports and exit")
-    parser.add_argument("--no-auto", action="store_true", help="do not try framing fallbacks")
+    parser.add_argument("--timeout", type=float, default=0.05)
+    parser.add_argument("--wait", type=float, default=2.0)
+    parser.add_argument("--cnt", type=int, default=1)
+    parser.add_argument("--list-ports", action="store_true")
+    parser.add_argument("--no-auto", action="store_true")
     parser.add_argument("--len-mode", type=int, choices=[0, 1, 2, 3])
     parser.add_argument("--len-endian", choices=["big", "little"])
     parser.add_argument("--crc-endian", choices=["big", "little"])
-    parser.add_argument("--data", help="ASCII data payload (e.g., approval fields Sxx=...;)")
-    parser.add_argument("--data-hex", help="Hex data payload (no 0x prefix, spaces allowed)")
+    parser.add_argument("--data")
+    parser.add_argument("--data-hex")
+    parser.add_argument("--retry", type=int, default=3,
+                        help="NAK retry count for safe commands (financial cmds always 1)")
+    parser.add_argument("--force-retry-financial", action="store_true",
+                        help="Override safety: allow NAK retry for FB/14/04. Use only with full understanding.")
 
-    subparsers = parser.add_subparsers(dest="command", required=True)
-
-    subparsers.add_parser("init", help="FB/14/01 terminal init (no data)")
-    subparsers.add_parser("info", help="FB/14/02 terminal info (no data)")
-    subparsers.add_parser("display", help="FB/14/03 display message (data=ASCII, '|' for lines)")
-    subparsers.add_parser("approval", help="FB/14/04 approval request (data=Sxx=...;)")
-    subparsers.add_parser("sound", help="FB/14/13 play sound (data=wav name, e.g., beep.wav)")
-    subparsers.add_parser("image", help="FB/14/14 image download (data=URL)")
-    rfid = subparsers.add_parser("rfid", help="FB/01/06 RFID card serial (data empty or 'R')")
-    rfid.add_argument("--reverse", action="store_true", help='send data "R" (reverse option in spec)')
+    subs = parser.add_subparsers(dest="command", required=True)
+    for name in ("init", "info", "display", "approval", "sound", "image"):
+        subs.add_parser(name)
+    rfid = subs.add_parser("rfid")
+    rfid.add_argument("--reverse", action="store_true")
 
     args = parser.parse_args()
 
     if args.list_ports:
         if list_ports is None:
-            print("[WARN] serial.tools.list_ports is not available in this environment.")
+            print("[WARN] serial.tools.list_ports unavailable")
         else:
             for p in list_ports.comports():
                 print(f"{p.device}\t{p.description}")
@@ -361,7 +184,7 @@ def main() -> None:
         "image": (CMD, 0x14, 0x14),
         "rfid": (CMD, 0x01, 0x06),
     }
-    cmd_tuple = cmd_map[args.command]
+    cmd_t = cmd_map[args.command]
 
     data_bytes = _build_data_bytes(args)
     if args.command == "rfid" and args.reverse:
@@ -369,57 +192,57 @@ def main() -> None:
 
     framings = _resolve_framings(args)
 
+    # Decide retry policy
+    policy = policy_for(cmd_t[2], cmd_t[1])
+    if args.force_retry_financial and policy == RetryPolicy.NEVER:
+        print("[경고] --force-retry-financial: 승인/취소에 NAK 재전송 활성화 (중복청구 위험)")
+        policy = RetryPolicy.SAFE
+    max_retries = args.retry if policy == RetryPolicy.SAFE else 1
+
+    _acquire_port_lock(args.port)
+
     try:
         with serial.Serial(
-            port=args.port,
-            baudrate=args.baud,
-            parity=serial.PARITY_NONE,
-            stopbits=serial.STOPBITS_ONE,
-            bytesize=serial.EIGHTBITS,
-            timeout=args.timeout,
-            write_timeout=args.timeout,
+            port=args.port, baudrate=args.baud, parity=serial.PARITY_NONE,
+            stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS,
+            timeout=args.timeout, write_timeout=args.timeout,
         ) as ser:
-            ser.reset_input_buffer()
-            ser.reset_output_buffer()
-
+            ser.reset_input_buffer(); ser.reset_output_buffer()
             last_buf = b""
             for idx, framing in enumerate(framings):
                 cnt = ((args.cnt - 1 + idx) % 255) + 1
-                buf, parsed = _request_once(
-                    ser=ser,
-                    framing=framing,
-                    cnt=cnt,
-                    cmd=cmd_tuple[0],
-                    gcd=cmd_tuple[1],
-                    jcd=cmd_tuple[2],
-                    data=data_bytes,
-                    max_wait_sec=args.wait,
+                buf, parsed, attempts = send_and_wait(
+                    ser, cnt=cnt, cmd=cmd_t[0], gcd=cmd_t[1], jcd=cmd_t[2],
+                    data=data_bytes, framing=framing, max_wait_sec=args.wait,
+                    retry_policy=policy, max_retries=max_retries,
                 )
                 last_buf = buf
+                print(f"[전송][len_mode={framing.len_mode} len={framing.len_endian} "
+                      f"crc={framing.crc_endian}] (attempts={attempts})")
 
                 if buf:
                     print(f"[수신] {len(buf)} 바이트: {_format_hex(buf)}")
                     if ACK_TRIPLE in buf:
                         print("[안내] ACK(06 06 06) 감지")
                     if NAK_TRIPLE in buf:
-                        print("[안내] NAK(15 15 15) 감지")
+                        print(f"[안내] NAK(15 15 15) 감지 — 재시도 {attempts}회")
                 else:
                     print("[수신] (데이터 없음)")
 
                 if parsed is None:
                     continue
-
                 _print_parsed(parsed)
+                _print_business_judgement(parsed)
                 return
 
+            ack_only_cmds = {"init", "display", "sound", "image"}
+            if args.command in ack_only_cmds and ACK_TRIPLE in last_buf:
+                print(f"[판정] {args.command} 성공 (ACK 수신, 응답 본문 없음 = SPEC 정상)")
+                return
             print("[오류] 현재 프레이밍으로 유효한 응답을 파싱하지 못했습니다.")
-            if last_buf:
-                print("[힌트] 위에 출력된 hex 덤프를 참고하거나 공유해 주세요.")
             sys.exit(2)
     except serial.SerialException as e:
         print(f"[오류] 시리얼 포트 {args.port!r} 열기 실패: {e}")
-        if sys.platform.startswith("win"):
-            print("[힌트] COM 포트는 동시에 한 프로그램만 열 수 없습니다. 다른 프로그램을 모두 종료하세요.")
         sys.exit(1)
 
 
