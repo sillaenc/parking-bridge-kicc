@@ -31,7 +31,7 @@ APPROVAL_FAIL_RX = bytes.fromhex(
 )
 
 # Phase 3 — pre-registration (PG capture did NOT happen): 1원 approval (R09=00000000, R19="매입불가")
-APPROVAL_TEST_MODE_OK_RX = bytes.fromhex(
+APPROVAL_PRE_REG_OK_RX = bytes.fromhex(
     "06 06 06 02 01 59 07 FB 14 04 00 53 30 30 3D 30 30 32 3B 53 30 31 3D 49 31 3B 53 "
     "30 32 3D 37 35 3B 53 30 33 3D 38 30 31 36 33 36 36 3B 53 30 34 3D 35 30 34 38 31 "
     "37 37 32 39 35 3B 53 30 35 3D 43 20 20 3B 53 30 36 3D 39 3B 53 30 37 3D 39 34 39 "

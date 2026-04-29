@@ -23,7 +23,7 @@ from ed721_proto import (
 from tests.fixtures.captures import (
     APPROVAL_FAIL_RX,
     APPROVAL_REAL_OK_RX,
-    APPROVAL_TEST_MODE_OK_RX,
+    APPROVAL_PRE_REG_OK_RX,
     APPROVAL_TIMEOUT_RX,
     APPROVAL_USER_CANCEL_RX,
     CANCEL_FAILED_RX,
@@ -77,9 +77,9 @@ class TestKVParse:
         kv = parse_kv_response(p.data)
         assert "KICC" in kv["R19"]            # "KICC로제출"
 
-    def test_test_mode_signals(self):
+    def test_pre_reg_signals(self):
         """Test-mode approval has R09=zeros and R19='매입불가...' """
-        p = _parse(APPROVAL_TEST_MODE_OK_RX)
+        p = _parse(APPROVAL_PRE_REG_OK_RX)
         kv = parse_kv_response(p.data)
         assert kv["R09"] == "00000000"
         assert "매입불가" in kv["R19"] or "포인트" in kv["R19"]
@@ -93,9 +93,9 @@ class TestApprovalSuccess:
         kv = parse_kv_response(p.data)
         assert is_approval_success(kv) is True
 
-    def test_test_mode_approval_is_NOT_success(self):
+    def test_pre_reg_approval_is_NOT_success(self):
         """R09=zeros means PG didn't actually take it — must NOT report success."""
-        p = _parse(APPROVAL_TEST_MODE_OK_RX)
+        p = _parse(APPROVAL_PRE_REG_OK_RX)
         kv = parse_kv_response(p.data)
         assert is_approval_success(kv) is False
 
@@ -137,10 +137,10 @@ class TestExtractCancelInfo:
         assert info["S13"] == "260429"        # R07[:6]
         assert info["S10"] == "0000000010"    # zero-padded
 
-    def test_returns_none_for_test_mode(self):
+    def test_pre_registration_capture_still_yields_params(self):
         """When R09 is all zeros (PG capture didn't happen), we still produce the params
         — caller can decide whether to actually use them based on is_approval_success."""
-        p = _parse(APPROVAL_TEST_MODE_OK_RX)
+        p = _parse(APPROVAL_PRE_REG_OK_RX)
         kv = parse_kv_response(p.data)
         info = extract_cancel_info(kv)
         # extract_cancel_info itself doesn't filter zeros — that's is_approval_success's job.
@@ -169,7 +169,7 @@ class TestFixtureSanity:
     @pytest.mark.parametrize("rx", [
         INFO_RX, RFID_OK_RX, RFID_CANCEL_RX,
         APPROVAL_USER_CANCEL_RX, APPROVAL_TIMEOUT_RX, APPROVAL_FAIL_RX,
-        APPROVAL_TEST_MODE_OK_RX, APPROVAL_REAL_OK_RX,
+        APPROVAL_PRE_REG_OK_RX, APPROVAL_REAL_OK_RX,
         CANCEL_FAILED_RX, CANCEL_OK_RX,
     ])
     def test_parses(self, rx):

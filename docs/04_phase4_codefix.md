@@ -28,7 +28,7 @@ assert build_cancel_data(...) does NOT contain b"S12=949094"  # S07 절대 X
 assert is_cancel_success(failed_cancel_kv) is False  # RCD=00이어도 실패
 assert is_cancel_success(real_cancel_kv) is True
 
-assert is_approval_success(test_mode_kv) is False    # R09=00000000 → 실 매입 X
+assert is_approval_success(pre_reg_kv) is False    # R09=00000000 → 실 매입 X
 assert is_approval_success(real_pg_kv) is True
 ```
 
@@ -45,7 +45,7 @@ assert is_approval_success(real_pg_kv) is True
 실측 응답 10종 hex 그대로 보관:
 - INFO_RX, RFID_OK_RX, RFID_CANCEL_RX
 - APPROVAL_USER_CANCEL_RX, APPROVAL_TIMEOUT_RX, APPROVAL_FAIL_RX
-- APPROVAL_TEST_MODE_OK_RX (R09=00000000)
+- APPROVAL_PRE_REG_OK_RX (R09=00000000, 재등록 전)
 - APPROVAL_REAL_OK_RX (R09=30044993)
 - CANCEL_FAILED_RX (S07 사용, R17 메시지 있음)
 - CANCEL_OK_RX (R09 사용, R17 없음)
@@ -57,7 +57,7 @@ assert is_approval_success(real_pg_kv) is True
 - `init` 실 단말 호출: 더 이상 exit 2 아님 → "성공" 출력 ✅
 - 회귀 검증: 어떤 코드가 S12에 S07을 다시 넣으면 즉시 테스트 실패
 
-## 미진행 (선택적)
-- `kicc_info_request.py`, `ed721_menu.py`를 `ed721_proto.py` 사용하도록 리팩토링 (3중 코드 중복 제거)
-- NAK 시 자동 재전송 정책 — 데이터 손실 위험 분석 후 결정
-- 부분 수신 버퍼 누적(현재는 단일 read 가정) — 운영 환경에서 거의 영향 없음
+## 후속 작업 (이후 진행 완료/유지)
+- ✅ `kicc_info_request.py`, `ed721_menu.py`, `ed721_cli.py`를 `ed721_proto.py` 사용하도록 리팩토링 → docs/07 참조
+- ✅ NAK 자동 재전송 정책 (RetryPolicy enum + financial NEVER 강제) → docs/07 참조
+- 미진행: 부분 수신 버퍼 누적(현재 단일 read 가정) — 운영 환경에서 영향 거의 없음
